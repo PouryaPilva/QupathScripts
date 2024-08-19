@@ -1,0 +1,11 @@
+import static qupath.lib.gui.commands.ProjectImportImagesCommand.*
+import qupath.lib.gui.scripting.QPEx
+import java.nio.file.Paths
+def imageData = QPEx.getCurrentImageData()
+def imageName = imageData.getServer().getMetadata().getName()
+def imageBaseName = imageName.substring(0, imageName.lastIndexOf('.'))
+def qdataPath = Paths.get("/homeStor1/data/", "${imageBaseName}.qpdata").toString()
+file =new File(qdataPath)
+def ann = qupath.lib.io.PathIO.readObjects(file)
+def outputGeoJsonPath = Paths.get("/homeStor1/Geojson/", "${imageBaseName}.geojson").toString()
+exportAllObjectsToGeoJson(outputGeoJsonPath, "PRETTY_JSON", "FEATURE_COLLECTION")
