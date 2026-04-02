@@ -1,0 +1,38 @@
+import qupath.lib.objects.PathObject
+
+def annotations = getAnnotationObjects()
+// Get slide name
+def slideName = getCurrentImageData().getServer().getMetadata().getName()
+def path = buildFilePath(PROJECT_BASE_DIR, slideName + "_annotations.xml")
+def writer = new StringWriter()
+def xml = new groovy.xml.MarkupBuilder(writer)
+xml.Annotations {
+    int annotID = 1
+    annotations.each { annot -> 
+        def roi = annot.getROI()
+        def points = roi.getAllPoints()
+        Annotation(
+            Id: annotID,
+            Name: slideName,   // ← slide name instead of annotation name
+            ReadOnly: 0,
+            LineColor: 16711680
+        ) {
+            Regions {
+                Region(Id: 1, Type: 0, Zoom: 0) {
+                    Vertices {
+                        points.each { p ->
+                            Vertex(X: p.getX(), Y: p.getY())
+                        }
+                    }
+                    
+                }
+            }
+        }
+        
+        annotID++
+    }
+}
+
+new File(path).text = writer.toString()
+
+println "Exported to: " + path
