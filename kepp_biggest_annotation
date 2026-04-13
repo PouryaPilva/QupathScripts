@@ -1,0 +1,25 @@
+import qupath.lib.objects.PathAnnotationObject
+
+// 1. Get all annotation objects in the current hierarchy
+def annotations = getAnnotationObjects()
+
+if (annotations.size() <= 1) {
+    println "Nothing to do: ${annotations.size()} annotations found."
+    return
+}
+
+// 2. Sort annotations by area in descending order
+// We use the geometry area from the underlying shape
+def sortedAnnotations = annotations.sort { a, b -> 
+    b.getROI().getArea() <=> a.getROI().getArea() 
+}
+
+// 3. Identify the keepers and the losers
+def biggest = sortedAnnotations[0]
+def toRemove = sortedAnnotations.subList(1, sortedAnnotations.size())
+
+// 4. Remove the smaller ones from the hierarchy
+removeObjects(toRemove, true)
+
+println "Kept annotation with area: ${biggest.getROI().getArea()}"
+println "Removed ${toRemove.size()} smaller annotations."
